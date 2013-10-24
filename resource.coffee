@@ -100,14 +100,42 @@ class HttpResource
       try
         returnObj = handler.call(context)
       catch e
-        errorObj = e
+        returnObj = e
 
-      # Transform a return value from a method into an HTTP status code
-      # and JSON response body
-      responseObj = @processReturnObject(
-        customContext.statusCode, returnObj, errorObj
+      @syncResponse(
+        @getResponseReplier(res),
+        customContext,
+        returnObj,
+        isError=true
       )
-      res.json(responseObj.statusCode, responseObj.body)
+
+  # Override to send something other than or in addition to, a JSON body
+  getResponseReplier: (res) ->
+    (args...) ->
+      res.json.apply(res, args)
+
+  isPromise: (obj) ->
+    typeof returnObj == 'function' and obj.then?
+
+  # Normalizes handling of synchronous and asynchronous responses
+  syncResponse: (reply, customContext, returnObj, isError = false) ->
+    doReply = (_returnValue, _isError) ->
+      responseObj = @convertToResponse(
+        customContext.statusCode, _returnValue, _isError
+      )
+      reply(responseObj.statusCode, responseObj.body)
+
+    if not @isPromise(returnObj)
+      doReply(returnObj, isError)
+    else
+      returnObj
+      .then((result) ->
+        doReply(result, false)
+      )
+      .fail((error) ->
+        doReply(error, true)
+      )
+      .done()
 
   # Creates an object suitable for use with paged UIs
   createDataPage: (dataArray, offset = 0, limit = -1) ->
@@ -119,7 +147,8 @@ class HttpResource
       objects: dataArray
     }
 
-  processReturnObject: (statusCode = 200, retObj, errorObj) ->
+  # Creates a response code and response body from a method return value
+  convertToResponse: (statusCode = 200, retObj, isError = false) ->
     if not errorObj
       statusCode = statusCode
       unless Array.isArray(retObj)
