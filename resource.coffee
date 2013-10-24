@@ -47,16 +47,29 @@ class HttpResource
       handler: @patch
       filters: @patchFilters
 
+  additionalEndpoints: null
+
   # Gets a list of all endpoints for this resource
   getEndpoints: ->
     endpoints = []
     for own endpoint of @crudEndpoints
       endpoints.push(endpoint)
+    if @additionalEndpoints?
+      additionalEndpoints = if typeof @additionalEndpoints == 'function' then @additionalEndpoints() else @additionalEndpoints
+      for endpoint of moreEndpoints
+        endpoint = endpoint() if
+        endpoints.push(endpoint)
     endpoints
 
   # Adds this resource's endpoints to an HTTP application router
   initializeResource: (app) ->
     for endpoint in @getEndpoints()
+      if typeof endpoint == 'string'
+        endpoint = @crudEndpoints[endpoint]
+        if not endpoint?
+          throw new Error(
+            'must provide valid endpoint or name of existing endpoint'
+          )
       handler = @createHandler(endpoint.handler)
       @addEndpoint(app, endpoint, handler)
 
