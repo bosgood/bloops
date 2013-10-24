@@ -69,6 +69,10 @@ class HttpResource
       params = paramFilters.reduce (params, filter) ->
         filter.process(req, res, params)
       , {}
+
+      customContext =
+        responseCode: null
+
       context =
         request: req
         req: req
@@ -76,8 +80,45 @@ class HttpResource
         res: res
         parameters: params
         params: params
+        context: customContext
 
-      handler.call(context)
+      try
+        returnObj = handler.call(context)
+      catch e
+        errorObj = e
+
+      # Transform a return value from a method into an HTTP status code
+      # and JSON response body
+      responseObj = @processReturnObject(
+        customContext.statusCode, returnObj, errorObj
+      )
+      res.json(responseObj.statusCode, responseObj.body)
+
+  # Creates an object suitable for use with paged UIs
+  createDataPage: (dataArray, offset = 0, limit = -1) ->
+    return {
+      totalCount: dataArray.length
+      count: dataArray.length
+      offset: offset
+      limit: limit
+      objects: dataArray
+    }
+
+  processReturnObject: (statusCode = 200, retObj, errorObj) ->
+    if not errorObj
+      statusCode = statusCode
+      unless Array.isArray(retObj)
+        body = retObj
+      else
+        body = @createDataPage(retObj)
+
+    else
+      # Got an error, force an error status code if not provided one
+      statusCode = if statusCode < 400 then 500 else statusCode
+      body = errorObj.data or {}
+      body.error: errorObj.message or 'an error occurred'
+
+    {statusCode, body}
 
   ###
   Endpoint implementations
