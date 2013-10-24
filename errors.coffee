@@ -6,4 +6,9 @@ class UserError extends Error
   constructor: (@message) ->
   statusCode: 400
 
-module.exports = {UserError}
+# Could not find the requested object(s)
+class NotFoundError extends Error
+  constructor: (@message) ->
+  statusCode: 404
+
+module.exports = {UserError, NotFoundError}
