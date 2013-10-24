@@ -197,3 +197,5 @@ class HttpResource
   patchFilters: [FromJson]
   patch: ->
     @api.update @params.id, @params
+
+module.exports = HttpResource
