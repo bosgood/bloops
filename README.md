@@ -12,7 +12,7 @@
 * It can be used in place for a word.
 * It can be used to be totally freaking random.
 * It can be used for basically anything.
-* It means whatever u want it to mean.
+* It means whatever you want it to mean.
 * It can be used to fill in awkward silences.
 
 Inspired by [sprocket](http://github.com/HubSpot/sprocket), a Python API framework from [HubSpot](http://dev.hubspot.com).
