@@ -76,6 +76,16 @@ class HttpResource
   # Implement this in a subclass to add a given endpoint to an HTTP app
   addEndpoint: (app) ->
 
+  # Creates an object suitable for use with paged UIs
+  createDataPage: (dataArray, offset = 0, limit = -1) ->
+    return {
+      totalCount: dataArray.length
+      count: dataArray.length
+      offset: offset
+      limit: limit
+      objects: dataArray
+    }
+
   # Binds route handlers to a context to make their definitions easier
   createHandler: (handler, paramFilters) ->
     (req, res) ->
@@ -136,16 +146,6 @@ class HttpResource
         doReply(error, true)
       )
       .done()
-
-  # Creates an object suitable for use with paged UIs
-  createDataPage: (dataArray, offset = 0, limit = -1) ->
-    return {
-      totalCount: dataArray.length
-      count: dataArray.length
-      offset: offset
-      limit: limit
-      objects: dataArray
-    }
 
   # Creates a response code and response body from a method return value
   convertToResponse: (statusCode = 200, retObj, isError = false) ->
