@@ -87,6 +87,8 @@ class HttpResource
         responseCode: null
 
       context =
+        api: @adapter
+        model: @model
         request: req
         req: req
         response: res
@@ -144,18 +146,25 @@ class HttpResource
 
   indexFilters: [FromUrlParams]
   index: ->
+    @api.find()
 
   showFilters: [FromUrlParams]
   show: ->
+    @api.find @params.id
 
   updateFilters: [FromJson]
   update: ->
+    @api.update @params.id, @params
 
   destroyFilters: [FromUrlParams]
   destroy: ->
+    @api.remove @params.id
 
   createFilters: [FromJson]
   create: ->
+    @context.statusCode = 201
+    @api.create @params
 
   patchFilters: [FromJson]
   patch: ->
+    @api.update @params.id, @params
