@@ -9,6 +9,9 @@ class HttpResource
   # Define as a type your DataAdapter will understand
   model: null
 
+  # If defined, will be prepended to all routes
+  resourceName: null
+
   crudEndpoints:
     index:
       route: '/'
@@ -57,21 +60,35 @@ class HttpResource
     if @additionalEndpoints?
       additionalEndpoints = if typeof @additionalEndpoints == 'function' then @additionalEndpoints() else @additionalEndpoints
       for endpoint of moreEndpoints
-        endpoint = endpoint() if
         endpoints.push(endpoint)
     endpoints
 
   # Adds this resource's endpoints to an HTTP application router
-  initializeResource: (app) ->
-    for endpoint in @getEndpoints()
+  initialize: (app) ->
+    unless @resourceName?
+      console.log "[RESOURCE] no resource name defined"
+      throw new Error(
+        'a resource must define a resourceName'
+      )
+
+    endpoints = @getEndpoints()
+    console.log "[RESOURCE] #{@resourceName}: found #{endpoints.length} endpoints"
+    for endpoint in endpoints
       if typeof endpoint == 'string'
-        endpoint = @crudEndpoints[endpoint]
+        endpointName = endpoint
+        endpoint = @crudEndpoints[endpointName]
         if not endpoint?
+          console.log "[RESOURCE] #{@resourceName}: didn't find CRUD endpoint: #{endpointName}"
           throw new Error(
             'must provide valid endpoint or name of existing endpoint'
           )
+      unless endpoint.handler?
+        console.log "[RESOURCE] #{@resourceName}: no endpoint handler defined: #{endpointName}"
+        throw new Error(
+          'must provide valid endpoint or name of existing endpoint'
+        )
       handler = @createHandler(endpoint.handler)
-      @addEndpoint(app, endpoint, handler)
+      @addEndpoint(app, endpoint, handler, @resourceName)
 
   # Implement this in a subclass to add a given endpoint to an HTTP app
   addEndpoint: (app) ->
@@ -89,9 +106,9 @@ class HttpResource
   # Binds route handlers to a context to make their definitions easier
   createHandler: (handler, paramFilters) ->
     (req, res) ->
-      params = paramFilters.reduce (params, filter) ->
+      params = paramFilters.reduce((params, filter) ->
         filter.process(req, res, params)
-      , {}
+      , {})
 
       customContext =
         responseCode: null
@@ -160,7 +177,7 @@ class HttpResource
       # Got an error, force an error status code if not provided one
       statusCode = if statusCode < 400 then 500 else statusCode
       body = errorObj.data or {}
-      body.error: errorObj.message or 'an error occurred'
+      body.error = errorObj.message or 'an error occurred'
 
     {statusCode, body}
 
