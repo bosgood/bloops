@@ -9,10 +9,9 @@ class HttpResource
   adapter: null
   # Define as a type your DataAdapter will understand
   model: null
-
   # If defined, will be prepended to all routes
   resourceName: null
-
+  additionalEndpoints: null
   crudEndpoints:
     index:
       route: '/'
@@ -51,7 +50,10 @@ class HttpResource
       handler: crud.patch.handler
       filters: crud.patch.filters
 
-  additionalEndpoints: null
+  constructor: (options) ->
+    for own option, val of options
+      console.log "[RESOURCE] setting option: #{option}"
+      @[option] = val
 
   # Gets a list of all endpoints for this resource
   getEndpoints: ->
@@ -75,6 +77,7 @@ class HttpResource
     endpoints = @getEndpoints()
     console.log "[RESOURCE] #{@resourceName}: found #{endpoints.length} endpoints"
     for endpoint in endpoints
+      # Distinguish between default and custom endpoints
       if typeof endpoint == 'string'
         endpointName = endpoint
         endpoint = @crudEndpoints[endpointName]
@@ -92,7 +95,9 @@ class HttpResource
       @addEndpoint(app, endpoint, handler, @resourceName)
 
   # Implement this in a subclass to add a given endpoint to an HTTP app
-  addEndpoint: (app) ->
+  addEndpoint: (app, endpoint, handler, resourceName) ->
+    console.log "[RESOURCE] #{@resourceName}: ERROR endpoint implementing not added"
+    throw new Error('must override addEndpoint to add endpoints')
 
   # Creates an object suitable for use with paged UIs
   createDataPage: (dataArray, offset = 0, limit = -1) ->
