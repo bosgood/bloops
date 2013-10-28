@@ -1,6 +1,7 @@
 filters = require './filters'
 FromJson = filters.FromJson
 FromUrlParams = filters.FromUrlParams
+crud = require './crud'
 
 # Defines a RESTful resource accessible through an HTTP API
 class HttpResource
@@ -16,39 +17,39 @@ class HttpResource
     index:
       route: '/'
       method: 'GET'
-      handler: @index
-      filters: @indexFilters
+      handler: crud.index.handler
+      filters: crud.index.filters
       emptyResult: []
 
     show:
       route: '/:id'
       method: 'GET'
-      handler: @show
-      filters: @showFilters
+      handler: crud.show.handler
+      filters: crud.show.filters
 
     update:
       route: '/:id'
       method: 'PUT'
-      handler: @update
-      filters: @updateFilters
+      handler: crud.update.handler
+      filters: crud.update.filters
 
     destroy:
       route: '/:id'
       method: 'DELETE'
-      handler: @destroy
-      filters: @destroyFilters
+      handler: crud.destroy.handler
+      filters: crud.destroy.filters
 
     create:
       route: '/'
       method: 'POST'
-      handler: @create
-      filters: @createFilters
+      handler: crud.create.handler
+      filters: crud.create.filters
 
     patch:
       route: '/:id'
       method: 'PATCH'
-      handler: @patch
-      filters: @patchFilters
+      handler: crud.patch.handler
+      filters: crud.patch.filters
 
   additionalEndpoints: null
 
@@ -180,39 +181,5 @@ class HttpResource
       body.error = errorObj.message or 'an error occurred'
 
     {statusCode, body}
-
-  ###
-  Endpoint implementations
-
-  Endpoints are called in the context of an object with the following properties:
-    response (alias: res) - current HTTP response
-    request (alias: req) - current HTTP request
-    parameters (alias: params) - parameters from the current request
-  ###
-
-  indexFilters: [FromUrlParams]
-  index: ->
-    @api.find()
-
-  showFilters: [FromUrlParams]
-  show: ->
-    @api.find @params.id
-
-  updateFilters: [FromJson]
-  update: ->
-    @api.update @params.id, @params
-
-  destroyFilters: [FromUrlParams]
-  destroy: ->
-    @api.remove @params.id
-
-  createFilters: [FromJson]
-  create: ->
-    @context.statusCode = 201
-    @api.create @params
-
-  patchFilters: [FromJson]
-  patch: ->
-    @api.update @params.id, @params
 
 module.exports = HttpResource
