@@ -1,4 +1,4 @@
-DataAdapter = require './data_adapter'
+DataAdapter = require '../data_adapter'
 Q = require 'q'
 
 # Provides a data adapter for mongoose, a MongoDB client
@@ -25,3 +25,5 @@ class MongooseAdapter extends DataAdapter
 
   remove: (conditions) ->
     Q(@Model.remove(conditions).exec())
+
+module.exports = MongooseAdapter
