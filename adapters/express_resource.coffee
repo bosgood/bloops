@@ -8,6 +8,10 @@ class ExpressHttpResource extends HttpResource
       resourceName = "/#{resourceName}"
 
     route = "#{resourceName}#{endpoint.route}"
+    # Trim trailing slashes in endpoint
+    if route[route.length - 1] == '/'
+      route = route.substring(0, route.length - 1)
+
     console.log "[HTTP] adding route: #{route}"
     app[endpoint.method.toLowerCase()](route, handler)
 
