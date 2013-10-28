@@ -14,6 +14,7 @@ index =
   filters: [FromUrlParams]
   handler: ->
     @api.find()
+
 show =
   filters: [FromUrlParams]
   handler :->

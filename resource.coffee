@@ -110,7 +110,7 @@ class HttpResource
     }
 
   # Binds route handlers to a context to make their definitions easier
-  createHandler: (handler, paramFilters) ->
+  createHandler: (handler, paramFilters) =>
     http = @
     (req, res) ->
       params = paramFilters.reduce((params, filter) ->
@@ -121,8 +121,8 @@ class HttpResource
         responseCode: null
 
       context =
-        api: @adapter
-        model: @model
+        api: http.adapter
+        model: http.model
         request: req
         req: req
         response: res
@@ -149,7 +149,7 @@ class HttpResource
       res.json.apply(res, args)
 
   isPromise: (obj) ->
-    typeof returnObj == 'function' and obj.then?
+    typeof obj == 'object' and obj.then?
 
   # Normalizes handling of synchronous and asynchronous responses
   syncResponse: (reply, customContext, returnObj, isError = false) =>
