@@ -7,7 +7,7 @@ class ExpressHttpResource extends HttpResource
     if resourceName != '' and resourceName[0] != '/'
       resourceName = "/#{resourceName}"
 
-    route = "#{resourceName}/#{endpoint.route}"
+    route = "#{resourceName}#{endpoint.route}"
     console.log "[HTTP] adding route: #{route}"
     app[endpoint.method.toLowerCase()](route, handler)
 
