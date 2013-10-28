@@ -91,7 +91,7 @@ class HttpResource
         throw new Error(
           'must provide valid endpoint or name of existing endpoint'
         )
-      handler = @createHandler(endpoint.handler)
+      handler = @createHandler(endpoint.handler, endpoint.filters)
       @addEndpoint(app, endpoint, handler, @resourceName)
 
   # Implement this in a subclass to add a given endpoint to an HTTP app
@@ -111,6 +111,7 @@ class HttpResource
 
   # Binds route handlers to a context to make their definitions easier
   createHandler: (handler, paramFilters) ->
+    http = @
     (req, res) ->
       params = paramFilters.reduce((params, filter) ->
         filter.process(req, res, params)
@@ -135,8 +136,8 @@ class HttpResource
       catch e
         returnObj = e
 
-      @syncResponse(
-        @getResponseReplier(res),
+      http.syncResponse(
+        http.getResponseReplier(res),
         customContext,
         returnObj,
         isError=true
@@ -151,8 +152,8 @@ class HttpResource
     typeof returnObj == 'function' and obj.then?
 
   # Normalizes handling of synchronous and asynchronous responses
-  syncResponse: (reply, customContext, returnObj, isError = false) ->
-    doReply = (_returnValue, _isError) ->
+  syncResponse: (reply, customContext, returnObj, isError = false) =>
+    doReply = (_returnValue, _isError) =>
       responseObj = @convertToResponse(
         customContext.statusCode, _returnValue, _isError
       )
@@ -171,8 +172,8 @@ class HttpResource
       .done()
 
   # Creates a response code and response body from a method return value
-  convertToResponse: (statusCode = 200, retObj, isError = false) ->
-    if not errorObj
+  convertToResponse: (statusCode = 200, retObj, isError = false) =>
+    if not isError
       statusCode = statusCode
       unless Array.isArray(retObj)
         body = retObj
@@ -182,8 +183,8 @@ class HttpResource
     else
       # Got an error, force an error status code if not provided one
       statusCode = if statusCode < 400 then 500 else statusCode
-      body = errorObj.data or {}
-      body.error = errorObj.message or 'an error occurred'
+      body = retObj.data or {}
+      body.error = retObj.message or 'an error occurred'
 
     {statusCode, body}
 

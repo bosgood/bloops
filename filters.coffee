@@ -5,7 +5,7 @@ module.exports = {}
 class ParamFilter
   process: (req, res, params) -> params
 
-module.exports.ParamFilter = ParamFilter
+module.exports.ParamFilter = new ParamFilter
 
 # Processes all URL parameters
 class FromUrlParams extends ParamFilter
@@ -14,7 +14,7 @@ class FromUrlParams extends ParamFilter
       params[key] = val
     params
 
-module.exports.FromUrlParams = FromUrlParams
+module.exports.FromUrlParams = new FromUrlParams
 
 # Processes all parameters in the passed-in JSON string. Treats missing JSON
 # string as an error
@@ -24,11 +24,11 @@ class FromJson extends ParamFilter
       params[key] = val
     params
 
-module.exports.FromJson = FromJson
+module.exports.FromJson = new FromJson
 
 class FromPostParams extends ParamFilter
   # TODO implement this
   # process: (req, res, params) ->
   #   params
 
-module.exports.FromPostParams = FromPostParams
+module.exports.FromPostParams = new FromPostParams
