@@ -52,7 +52,7 @@ class HttpResource
 
   constructor: (options) ->
     for own option, val of options
-      console.log "[RESOURCE] setting option: #{option}"
+      # console.log "[RESOURCE] setting option: #{option}"
       @[option] = val
 
   # Gets a list of all endpoints for this resource
