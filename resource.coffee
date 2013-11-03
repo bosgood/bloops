@@ -110,8 +110,7 @@ class HttpResource
 
   # Binds route handlers to a context to make their definitions easier
   createHandler: (handler, paramFilters) =>
-    http = @
-    (req, res) ->
+    (req, res) =>
       params = paramFilters.reduce((params, filter) ->
         filter.process(req, res, params)
       , {})
@@ -127,11 +126,11 @@ class HttpResource
         parameters: params
         params: params
         context: customContext
-        api: new http.adapter(http.model)
-        adapter: http.adapter
-        model: http.model
+        api: @createApi(@adapter, @model)
+        adapter: @adapter
+        model: @model
 
-      for own key, val of http.context
+      for own key, val of @context
         context[key] = val
 
       isError = false
@@ -141,12 +140,15 @@ class HttpResource
         isError = true
         returnObj = e
 
-      http.syncResponse(
-        http.getResponseReplier(res),
+      @syncResponse(
+        @getResponseReplier(res),
         customContext,
         returnObj,
         isError
       )
+
+  createApi: (Adapter, Model) ->
+    new Adapter(Model)
 
   # Override to send something other than or in addition to, a JSON body
   getResponseReplier: (res) ->
