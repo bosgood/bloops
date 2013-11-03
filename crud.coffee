@@ -18,17 +18,20 @@ index =
 show =
   filters: [FromUrlParams]
   handler :->
-    @api.find @params.id
+    @api.find _id: @params.id
 
 update =
   filters: [FromJson]
   handler: ->
-    @api.update @params.id, @params
+    @api.update(
+      { _id: @params.id },
+      @params
+    )
 
 destroy =
   filters: [FromUrlParams]
   handler: ->
-    @api.remove @params.id
+    @api.remove _id: @params.id
 
 create =
   filters: [FromJson]
