@@ -56,15 +56,14 @@ class HttpResource
       @[option] = val
 
   # Gets a list of all endpoints for this resource
-  getEndpoints: ->
-    endpoints = []
-    for own endpoint of @crudEndpoints
-      endpoints.push(endpoint)
-    if @additionalEndpoints?
-      additionalEndpoints = if typeof @additionalEndpoints == 'function' then @additionalEndpoints() else @additionalEndpoints
-      for endpoint of moreEndpoints
-        endpoints.push(endpoint)
-    endpoints
+  getEndpoints: -> [
+    'index'
+    'show'
+    'update'
+    'destroy'
+    'create'
+    'patch'
+  ]
 
   # Adds this resource's endpoints to an HTTP application router
   initialize: (app) ->
@@ -121,8 +120,6 @@ class HttpResource
         responseCode: null
 
       context =
-        api: http.adapter
-        model: http.model
         request: req
         req: req
         response: res
@@ -130,17 +127,25 @@ class HttpResource
         parameters: params
         params: params
         context: customContext
+        api: new http.adapter(http.model)
+        adapter: http.adapter
+        model: http.model
 
+      for own key, val of http.context
+        context[key] = val
+
+      isError = false
       try
         returnObj = handler.call(context)
       catch e
+        isError = true
         returnObj = e
 
       http.syncResponse(
         http.getResponseReplier(res),
         customContext,
         returnObj,
-        isError=true
+        isError
       )
 
   # Override to send something other than or in addition to, a JSON body
@@ -167,6 +172,7 @@ class HttpResource
         doReply(result, false)
       )
       .fail((error) ->
+        console.error(error.stack)
         doReply(error, true)
       )
       .done()
@@ -185,6 +191,7 @@ class HttpResource
       statusCode = if statusCode < 400 then 500 else statusCode
       body = retObj.data or {}
       body.error = retObj.message or 'an error occurred'
+      body.object = retObj
 
     {statusCode, body}
 
