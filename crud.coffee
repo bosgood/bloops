@@ -24,7 +24,7 @@ update =
   filters: [FromJson]
   handler: ->
     @api.update(
-      { _id: @params.id },
+      { _id: @params._id },
       @params
     )
 
@@ -42,6 +42,6 @@ create =
 patch =
   filters: [FromJson]
   handler: ->
-    @api.update @params.id, @params
+    @api.update @params._id, @params
 
 module.exports = {index, show, update, destroy, create, patch}
