@@ -197,6 +197,11 @@ class HttpResource
 
     else
       # Got an error, force an error status code if not provided one
+      if retObj.statusCode?
+        statusCode = retObj.statusCode
+      else if statusCode < 400
+        statusCode = 500
+
       statusCode = if statusCode < 400 then 500 else statusCode
       body = retObj.data or {}
       body.error = retObj.message or 'an error occurred'
