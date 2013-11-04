@@ -181,20 +181,25 @@ class HttpResource
       )
       .done()
 
+  wrapRawResult: (result) ->
+    { result: result }
+
   # Creates a response code and response body from a method return value
   convertToResponse: (statusCode = 200, retObj, isError = false) =>
     if not isError
       statusCode = statusCode
-      unless Array.isArray(retObj)
+      if Array.isArray(retObj)
+        if retObj.length == 0
+          statusCode = 404
+        body = @createDataPage(retObj)
+      else
         body = retObj
         if not retObj?
           body = {}
           statusCode = 404
-      else
-        if retObj.length == 0
-          statusCode = 404
-        body = @createDataPage(retObj)
-
+        # JSON responses must be in an object, so wrap raw responses as {result: <obj>}
+        else if typeof retObj != 'object'
+          body = @wrapRawResult(retObj)
     else
       # Got an error, force an error status code if not provided one
       if retObj.statusCode?

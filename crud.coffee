@@ -29,9 +29,18 @@ update =
     )
 
 destroy =
-  filters: [FromUrlParams]
+  filters: [FromJson, FromUrlParams]
   handler: ->
-    @api.remove _id: @params.id
+    @api.remove(_id: @params.id)
+    .then((removedCount) =>
+      if removedCount == 0
+        return null
+      else
+        return {
+          _id: @params.id
+          deletedCount: removedCount
+        }
+    )
 
 create =
   filters: [FromJson]
