@@ -187,7 +187,12 @@ class HttpResource
       statusCode = statusCode
       unless Array.isArray(retObj)
         body = retObj
+        if not retObj?
+          body = {}
+          statusCode = 404
       else
+        if retObj.length == 0
+          statusCode = 404
         body = @createDataPage(retObj)
 
     else
