@@ -18,7 +18,6 @@ class HttpResource
       method: 'GET'
       handler: crud.index.handler
       filters: crud.index.filters
-      emptyResult: []
 
     show:
       route: '/:id'
@@ -127,6 +126,7 @@ class HttpResource
         params: params
         context: customContext
         api: @createApi(@adapter, @model)
+        createApi: @createApi
         adapter: @adapter
         model: @model
 
@@ -167,6 +167,8 @@ class HttpResource
       reply(responseObj.statusCode, responseObj.body)
 
     if not @isPromise(returnObj)
+      if isError
+        console.error(returnObj.stack)
       doReply(returnObj, isError)
     else
       returnObj

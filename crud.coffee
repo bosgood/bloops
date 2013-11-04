@@ -13,12 +13,12 @@ Endpoints are called in the context of an object with the following properties:
 index =
   filters: [FromUrlParams]
   handler: ->
-    @api.find()
+    @api.list()
 
 show =
   filters: [FromUrlParams]
   handler :->
-    @api.find _id: @params.id
+    @api.find(_id: @params.id)
 
 update =
   filters: [FromJson]

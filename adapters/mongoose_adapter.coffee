@@ -7,8 +7,17 @@ class MongooseAdapter extends DataAdapter
   constructor: (@Model) ->
     throw new Error('must provide a type of model') unless @Model?
 
-  find: (conditions) ->
+  list: (conditions) ->
     Q(@Model.find(conditions).exec())
+
+  find: (conditions) ->
+    @list(conditions)
+    .then((items) ->
+      if items?.length == 0
+        return null
+      else
+        return items[0]
+    )
 
   create: (properties) ->
     Q.nbind(@Model.create, @Model)(properties)
