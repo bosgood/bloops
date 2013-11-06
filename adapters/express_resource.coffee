@@ -13,6 +13,9 @@ class ExpressHttpResource extends HttpResource
       route = route.substring(0, route.length - 1)
 
     console.log "[HTTP] adding route: #{endpoint.method} #{route}"
+
+    @willAddEndpoint?(route, endpoint.method, handler)
     app[endpoint.method.toLowerCase()](route, handler)
+    @didAddEndpoint?(route, endpoint.method, handler)
 
 module.exports = ExpressHttpResource
