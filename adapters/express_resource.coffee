@@ -15,7 +15,16 @@ class ExpressHttpResource extends HttpResource
     console.log "[HTTP] adding route: #{endpoint.method} #{route}"
 
     @willAddEndpoint?(app, route, endpoint.method, handler)
-    app[endpoint.method.toLowerCase()](route, handler)
+
+    # Splice middleware into arguments array if any is provided
+    args = [route]
+    middleware = @getMiddleware()
+    if middleware?.length > 0
+      args = args.concat(middleware)
+    args.push handler
+
+    app[endpoint.method.toLowerCase()].apply(app, args)
+
     @didAddEndpoint?(app, route, endpoint.method, handler)
 
 module.exports = ExpressHttpResource

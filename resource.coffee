@@ -214,4 +214,9 @@ class HttpResource
 
     {statusCode, body}
 
+  # Gets middleware to use with a given endpoint
+  # TODO make this a whole lot better with some sort of mixin per resource
+  getMiddleware: (route) ->
+    []
+
 module.exports = HttpResource
