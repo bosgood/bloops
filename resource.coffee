@@ -39,7 +39,7 @@ class HttpResource
 
     create:
       route: '/'
-      method: 'POST'
+      method: ['POST', 'PUT']
       handler: crud.create.handler
       filters: crud.create.filters
 

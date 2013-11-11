@@ -23,7 +23,10 @@ class ExpressHttpResource extends HttpResource
       args = args.concat(middleware)
     args.push handler
 
-    app[endpoint.method.toLowerCase()].apply(app, args)
+    # Support definition with multiple HTTP methods in endpoint
+    methods = if Array.isArray(endpoint.method) then endpoint.method else [endpoint.method]
+    for method in methods
+      app[method.toLowerCase()].apply(app, args)
 
     @didAddEndpoint?(app, route, endpoint.method, handler)
 
