@@ -2,6 +2,7 @@ filters = require './filters'
 FromJson = filters.FromJson
 FromUrlParams = filters.FromUrlParams
 crud = require './crud'
+middleware = require './middleware'
 
 # Defines a RESTful resource accessible through an HTTP API
 class HttpResource
@@ -223,6 +224,9 @@ class HttpResource
   # Gets middleware to use with a given endpoint
   # TODO make this a whole lot better with some sort of mixin per resource
   getMiddleware: (route) ->
-    []
+    if @nestResponseObject
+      [middleware.NestedResponseUnpacker(@resourceName)]
+    else
+      []
 
 module.exports = HttpResource
