@@ -30,4 +30,9 @@ class ExpressHttpResource extends HttpResource
 
     @didAddEndpoint?(app, route, endpoint.method, handler)
 
+  # Override to send something other than or in addition to, a JSON body
+  getResponseReplier: (res) ->
+    (args...) ->
+      res.json.apply(res, args)
+
 module.exports = ExpressHttpResource

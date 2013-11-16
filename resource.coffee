@@ -5,6 +5,9 @@ crud = require './crud'
 
 # Defines a RESTful resource accessible through an HTTP API
 class HttpResource
+  # Set to false to return a naked object instead of REST-style
+  # { objectName: {} } responses
+  nestResponseObject: true
   # Define as an (sub)type of DataAdapter
   adapter: null
   # Define as a type your DataAdapter will understand
@@ -150,10 +153,10 @@ class HttpResource
   createApi: (Adapter, Model) ->
     new Adapter(Model)
 
-  # Override to send something other than or in addition to, a JSON body
+  # Override to implement responding for your HTTP adapter
   getResponseReplier: (res) ->
     (args...) ->
-      res.json.apply(res, args)
+      false
 
   isPromise: (obj) ->
     typeof obj == 'object' and obj.then?
@@ -164,7 +167,13 @@ class HttpResource
       responseObj = @convertToResponse(
         customContext.statusCode, _returnValue, _isError
       )
-      reply(responseObj.statusCode, responseObj.body)
+      resp = responseObj.body
+      if @nestResponseObject
+        wrapper = {}
+        wrapper[@resourceName] = resp
+        resp = wrapper
+
+      reply(responseObj.statusCode, resp)
 
     if not @isPromise(returnObj)
       if isError
