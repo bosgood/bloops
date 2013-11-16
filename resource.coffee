@@ -118,9 +118,12 @@ class HttpResource
   # Binds route handlers to a context to make their definitions easier
   createHandler: (handler, paramFilters) =>
     (req, res) =>
-      params = paramFilters.reduce((params, filter) ->
-        filter.process(req, res, params)
-      , {})
+      if paramFilters?
+        params = paramFilters.reduce((params, filter) ->
+          filter.process(req, res, params)
+        , {})
+      else
+        params = {}
 
       customContext =
         responseCode: null
