@@ -167,13 +167,7 @@ class HttpResource
       responseObj = @convertToResponse(
         customContext.statusCode, _returnValue, _isError
       )
-      resp = responseObj.body
-      if @nestResponseObject
-        wrapper = {}
-        wrapper[@resourceName] = resp
-        resp = wrapper
-
-      reply(responseObj.statusCode, resp)
+      reply(responseObj.statusCode, responseObj.body)
 
     if not @isPromise(returnObj)
       if isError
@@ -207,6 +201,11 @@ class HttpResource
         # JSON responses must be in an object, so wrap raw responses as {result: <obj>}
         else if typeof retObj != 'object'
           body = @wrapRawResult(retObj)
+
+        if @nestResponseObject
+          wrapper = {}
+          wrapper[@resourceName] = body
+          body = wrapper
     else
       # Got an error, force an error status code if not provided one
       if retObj.statusCode?
