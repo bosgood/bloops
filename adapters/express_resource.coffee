@@ -3,7 +3,7 @@ HttpResource = require '../resource'
 # Implements an HTTP resource served by an Express app
 class ExpressHttpResource extends HttpResource
   addEndpoint: (app, endpoint, handler) ->
-    resourceName = @resourceName
+    resourceName = @resourceNameMany
     if resourceName != '' and resourceName[0] != '/'
       resourceName = "/#{resourceName}"
 

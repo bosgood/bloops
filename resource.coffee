@@ -8,13 +8,17 @@ middleware = require './middleware'
 class HttpResource
   # Set to false to return a naked object instead of REST-style
   # { objectName: {} } responses
-  nestResponseObject: true
+  nestResponseObject: false
+  # Set to true to unpack nested objects in requests
+  acceptNestedRequestObjects: true
   # Define as an (sub)type of DataAdapter
   adapter: null
   # Define as a type your DataAdapter will understand
   model: null
   # If defined, will be prepended to all routes
-  resourceName: null
+  resourceNameMany: null
+  # Used for deserializing nested objects
+  resourceNameOne: null
   additionalEndpoints: null
   crudEndpoints:
     index:
@@ -70,35 +74,35 @@ class HttpResource
 
   # Adds this resource's endpoints to an HTTP application router
   initialize: (app) ->
-    unless @resourceName?
+    unless @resourceNameMany?
       console.log "[RESOURCE] no resource name defined"
       throw new Error(
-        'a resource must define a resourceName'
+        'a resource must define a resourceNameMany'
       )
 
     endpoints = @getEndpoints()
-    console.log "[RESOURCE] #{@resourceName}: found #{endpoints.length} endpoints"
+    console.log "[RESOURCE] #{@resourceNameMany}: found #{endpoints.length} endpoints"
     for endpoint in endpoints
       # Distinguish between default and custom endpoints
       if typeof endpoint == 'string'
         endpointName = endpoint
         endpoint = @crudEndpoints[endpointName]
         if not endpoint?
-          console.log "[RESOURCE] #{@resourceName}: didn't find CRUD endpoint: #{endpointName}"
+          console.log "[RESOURCE] #{@resourceNameMany}: didn't find CRUD endpoint: #{endpointName}"
           throw new Error(
             'must provide valid endpoint or name of existing endpoint'
           )
       unless endpoint.handler?
-        console.log "[RESOURCE] #{@resourceName}: no endpoint handler defined: #{endpointName}"
+        console.log "[RESOURCE] #{@resourceNameMany}: no endpoint handler defined: #{endpointName}"
         throw new Error(
           'must provide valid endpoint or name of existing endpoint'
         )
       handler = @createHandler(endpoint.handler, endpoint.filters)
-      @addEndpoint(app, endpoint, handler, @resourceName)
+      @addEndpoint(app, endpoint, handler, @resourceNameMany)
 
   # Implement this in a subclass to add a given endpoint to an HTTP app
-  addEndpoint: (app, endpoint, handler, resourceName) ->
-    console.log "[RESOURCE] #{@resourceName}: ERROR endpoint implementing not added"
+  addEndpoint: (app, endpoint, handler, resourceNameMany) ->
+    console.log "[RESOURCE] #{resourceNameMany}: ERROR endpoint implementing not added"
     throw new Error('must override addEndpoint to add endpoints')
 
   # Creates an object suitable for use with paged UIs
@@ -205,7 +209,7 @@ class HttpResource
 
         if @nestResponseObject
           wrapper = {}
-          wrapper[@resourceName] = body
+          wrapper[@resourceNameOne] = body
           body = wrapper
     else
       # Got an error, force an error status code if not provided one
@@ -224,8 +228,8 @@ class HttpResource
   # Gets middleware to use with a given endpoint
   # TODO make this a whole lot better with some sort of mixin per resource
   getMiddleware: (route) ->
-    if @nestResponseObject
-      [middleware.NestedResponseUnpacker(@resourceName)]
+    if @acceptNestedRequestObjects
+      [middleware.NestedResponseUnpacker(@resourceNameMany, @resourceNameOne)]
     else
       []
 

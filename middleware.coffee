@@ -5,11 +5,14 @@
 # to:   { name: "value" }
 # where `resource' is a resource's resourceName and this object
 # format expectation is used if nestResponseObject is true.
-NestedResponseUnpacker = (resourceName) ->
+NestedResponseUnpacker = (resourceNameMany, resourceNameOne) ->
   (req, res, next) ->
-    if req.body[resourceName]?
-      req.body = req.body.resourceName
-      break
+    one = req.body[resourceNameOne]
+    many = req.body[resourceNameMany]
+    if one?
+      req.body = one
+    else if many?
+      req.body = many
 
     next()
 
