@@ -8,9 +8,9 @@ middleware = require './middleware'
 class HttpResource
   # Set to false to return a naked object instead of REST-style
   # { objectName: {} } responses
-  nestResponseObject: true
+  nestResponseObject: false
   # Set to true to unpack nested objects in requests
-  acceptNestedRequestObjects: true
+  acceptNestedRequestObjects: false
   # Define as an (sub)type of DataAdapter
   adapter: null
   # Define as a type your DataAdapter will understand
